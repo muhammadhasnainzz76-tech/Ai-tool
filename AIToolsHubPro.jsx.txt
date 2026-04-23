@@ -1,0 +1,1152 @@
+import { useState, useEffect, useRef } from "react";
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');`;
+
+const AI_TOOLS = [
+  // Content & Writing
+  { id: 1, name: "AI Story Writer", desc: "Generate compelling stories in seconds", cat: "Writing", icon: "✍️", badge: "HOT", uses: "2.1M", color: "#FF6B6B" },
+  { id: 2, name: "AI Blog Post Generator", desc: "Full SEO blogs in one click", cat: "Writing", icon: "📝", badge: "NEW", uses: "980K", color: "#FF8E53" },
+  { id: 3, name: "AI Email Writer", desc: "Professional emails instantly", cat: "Writing", icon: "📧", uses: "1.4M", color: "#FFC107" },
+  { id: 4, name: "AI Text Summarizer", desc: "Summarize any text in seconds", cat: "Writing", icon: "📋", uses: "3.2M", color: "#4CAF50" },
+  { id: 5, name: "AI Poem Generator", desc: "Beautiful poems on any topic", cat: "Writing", icon: "🎭", uses: "670K", color: "#9C27B0" },
+  { id: 6, name: "AI Essay Writer", desc: "Academic essays with citations", cat: "Writing", icon: "🎓", badge: "HOT", uses: "1.8M", color: "#2196F3" },
+  { id: 7, name: "AI Script Writer", desc: "YouTube & movie scripts", cat: "Writing", icon: "🎬", uses: "540K", color: "#E91E63" },
+  { id: 8, name: "AI Paraphraser", desc: "Rewrite any text uniquely", cat: "Writing", icon: "🔄", uses: "4.1M", color: "#00BCD4" },
+  // Social & Marketing
+  { id: 9, name: "AI Instagram Caption", desc: "Viral captions with hashtags", cat: "Social", icon: "📸", badge: "VIRAL", uses: "5.2M", color: "#E91E63" },
+  { id: 10, name: "AI YouTube Title Generator", desc: "Clickbait titles that rank", cat: "Social", icon: "▶️", badge: "HOT", uses: "3.8M", color: "#FF0000" },
+  { id: 11, name: "AI Hashtag Generator", desc: "Top trending hashtags", cat: "Social", icon: "#️⃣", uses: "2.9M", color: "#1DA1F2" },
+  { id: 12, name: "AI TikTok Script", desc: "Viral TikTok video scripts", cat: "Social", icon: "🎵", badge: "VIRAL", uses: "4.4M", color: "#010101" },
+  { id: 13, name: "AI Ad Copy Generator", desc: "High-converting ad copies", cat: "Social", icon: "📢", uses: "1.1M", color: "#FF6B35" },
+  { id: 14, name: "AI Product Description", desc: "Amazon & Shopify descriptions", cat: "Social", icon: "🛍️", uses: "2.3M", color: "#FF9900" },
+  { id: 15, name: "AI Twitter/X Thread", desc: "Viral Twitter threads fast", cat: "Social", icon: "🐦", badge: "NEW", uses: "1.6M", color: "#1DA1F2" },
+  { id: 16, name: "AI LinkedIn Post", desc: "Professional LinkedIn content", cat: "Social", icon: "💼", uses: "890K", color: "#0077B5" },
+  // Image & Design
+  { id: 17, name: "AI Image Generator", desc: "Text to stunning images", cat: "Image", icon: "🖼️", badge: "HOT", uses: "8.7M", color: "#FF6B6B" },
+  { id: 18, name: "AI Logo Maker", desc: "Professional logos in seconds", cat: "Image", icon: "✨", badge: "HOT", uses: "3.4M", color: "#9C27B0" },
+  { id: 19, name: "AI Background Remover", desc: "Remove BG in one click", cat: "Image", icon: "🎨", uses: "6.2M", color: "#4CAF50" },
+  { id: 20, name: "AI Thumbnail Maker", desc: "YouTube thumbnails that get clicks", cat: "Image", icon: "🖥️", badge: "VIRAL", uses: "2.8M", color: "#FF5722" },
+  { id: 21, name: "AI Photo Enhancer", desc: "Upscale & enhance any photo", cat: "Image", icon: "📷", uses: "4.1M", color: "#00BCD4" },
+  { id: 22, name: "AI Avatar Generator", desc: "AI profile pictures", cat: "Image", icon: "👤", badge: "NEW", uses: "3.6M", color: "#673AB7" },
+  { id: 23, name: "AI Color Palette", desc: "Beautiful color combos", cat: "Image", icon: "🎨", uses: "1.2M", color: "#FF4081" },
+  { id: 24, name: "AI Meme Generator", desc: "Viral memes in seconds", cat: "Image", icon: "😂", badge: "VIRAL", uses: "7.1M", color: "#FFC107" },
+  // SEO & Business
+  { id: 25, name: "AI SEO Keyword Tool", desc: "Find high-traffic keywords", cat: "SEO", icon: "🔍", badge: "HOT", uses: "2.6M", color: "#4CAF50" },
+  { id: 26, name: "AI Meta Description", desc: "SEO meta tags generator", cat: "SEO", icon: "🏷️", uses: "1.8M", color: "#2196F3" },
+  { id: 27, name: "AI Content Calendar", desc: "Plan 30-day content easily", cat: "SEO", icon: "📅", uses: "760K", color: "#FF9800" },
+  { id: 28, name: "AI Business Name Generator", desc: "Unique business names fast", cat: "SEO", icon: "🏢", uses: "2.1M", color: "#E91E63" },
+  { id: 29, name: "AI SWOT Analysis", desc: "Instant business analysis", cat: "SEO", icon: "📊", uses: "430K", color: "#607D8B" },
+  { id: 30, name: "AI Press Release", desc: "Professional PR in minutes", cat: "SEO", icon: "📰", uses: "340K", color: "#795548" },
+  // Career & Education
+  { id: 31, name: "AI Resume Builder", desc: "ATS-friendly resumes", cat: "Career", icon: "📄", badge: "HOT", uses: "4.9M", color: "#2196F3" },
+  { id: 32, name: "AI Cover Letter", desc: "Perfect cover letters", cat: "Career", icon: "💌", uses: "2.7M", color: "#9C27B0" },
+  { id: 33, name: "AI Interview Q&A", desc: "Prepare for any interview", cat: "Career", icon: "🎯", badge: "NEW", uses: "1.3M", color: "#FF5722" },
+  { id: 34, name: "AI Quiz Generator", desc: "Educational quizzes instantly", cat: "Career", icon: "❓", uses: "890K", color: "#4CAF50" },
+  { id: 35, name: "AI Lesson Planner", desc: "Teacher lesson plans fast", cat: "Career", icon: "📚", uses: "560K", color: "#FFC107" },
+  // Voice & Audio
+  { id: 36, name: "AI Voice Generator", desc: "Text to natural speech", cat: "Audio", icon: "🎙️", badge: "HOT", uses: "3.1M", color: "#E91E63" },
+  { id: 37, name: "AI Music Generator", desc: "Create music from text", cat: "Audio", icon: "🎵", badge: "NEW", uses: "2.4M", color: "#9C27B0" },
+  { id: 38, name: "AI Podcast Script", desc: "Full podcast scripts", cat: "Audio", icon: "🎧", uses: "670K", color: "#FF9800" },
+  { id: 39, name: "AI Sound Effects", desc: "Custom audio effects", cat: "Audio", icon: "🔊", uses: "420K", color: "#00BCD4" },
+  // Code & Tech
+  { id: 40, name: "AI Code Generator", desc: "Generate code in any language", cat: "Code", icon: "💻", badge: "HOT", uses: "5.8M", color: "#4CAF50" },
+  { id: 41, name: "AI Code Debugger", desc: "Fix bugs automatically", cat: "Code", icon: "🐛", uses: "3.2M", color: "#FF5722" },
+  { id: 42, name: "AI SQL Query Builder", desc: "Complex SQL queries fast", cat: "Code", icon: "🗄️", uses: "1.4M", color: "#2196F3" },
+  { id: 43, name: "AI Website Builder", desc: "Full websites from text", cat: "Code", icon: "🌐", badge: "NEW", uses: "2.1M", color: "#9C27B0" },
+  { id: 44, name: "AI API Documentation", desc: "Auto-generate API docs", cat: "Code", icon: "📡", uses: "780K", color: "#607D8B" },
+  // Fun & Viral
+  { id: 45, name: "AI Roast Generator", desc: "Hilarious roasts for friends", cat: "Fun", icon: "🔥", badge: "VIRAL", uses: "9.2M", color: "#FF6B35" },
+  { id: 46, name: "AI Joke Generator", desc: "Fresh jokes on demand", cat: "Fun", icon: "😄", uses: "4.6M", color: "#FFC107" },
+  { id: 47, name: "AI Horoscope Generator", desc: "AI-powered daily horoscope", cat: "Fun", icon: "⭐", badge: "VIRAL", uses: "6.8M", color: "#9C27B0" },
+  { id: 48, name: "AI Name Meaning", desc: "Deep meaning of any name", cat: "Fun", icon: "🌟", uses: "3.4M", color: "#E91E63" },
+  { id: 49, name: "AI Dream Interpreter", desc: "What does your dream mean?", cat: "Fun", icon: "💭", badge: "NEW", uses: "2.9M", color: "#673AB7" },
+  { id: 50, name: "AI Chatbot Assistant", desc: "Your 24/7 AI companion", cat: "Fun", icon: "🤖", badge: "HOT", uses: "11.2M", color: "#2196F3" },
+];
+
+const CATEGORIES = ["All", "Writing", "Social", "Image", "SEO", "Career", "Audio", "Code", "Fun"];
+
+const TRENDING = [
+  { rank: 1, name: "AI Chatbot Assistant", uses: "11.2M", change: "+234%" },
+  { rank: 2, name: "AI Roast Generator", uses: "9.2M", change: "+189%" },
+  { rank: 3, name: "AI Image Generator", uses: "8.7M", change: "+156%" },
+  { rank: 4, name: "AI Horoscope Generator", uses: "6.8M", change: "+143%" },
+  { rank: 5, name: "AI Background Remover", uses: "6.2M", change: "+121%" },
+];
+
+const BLOG_POSTS = [
+  { title: "Best Free AI Tools for Students in 2025", reads: "124K", time: "8 min", tag: "Education", img: "🎓" },
+  { title: "Top 10 AI Image Generators with No Signup", reads: "98K", time: "6 min", tag: "Images", img: "🖼️" },
+  { title: "How AI Tools Are Changing Blogging Forever", reads: "87K", time: "7 min", tag: "Writing", img: "✍️" },
+  { title: "AI Tools for Pakistani Freelancers: Complete Guide", reads: "76K", time: "10 min", tag: "Freelance", img: "🇵🇰" },
+  { title: "Free AI Logo Makers vs Paid: Which Wins?", reads: "65K", time: "5 min", tag: "Design", img: "✨" },
+  { title: "Viral TikTok Ideas Using AI in 2025", reads: "153K", time: "4 min", tag: "Social", img: "🎵" },
+];
+
+function useCountUp(target, duration = 2000, start = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime = null;
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration, start]);
+  return count;
+}
+
+function AdBlock({ type = "banner", label = "Advertisement" }) {
+  const styles = {
+    banner: { width: "100%", height: "90px", fontSize: "13px" },
+    rectangle: { width: "100%", height: "250px", fontSize: "13px" },
+    sidebar: { width: "100%", height: "600px", fontSize: "13px" },
+  };
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.03)",
+      border: "1px dashed rgba(255,255,255,0.1)",
+      borderRadius: "12px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "rgba(255,255,255,0.2)",
+      fontFamily: "'Outfit', sans-serif",
+      gap: "6px",
+      ...styles[type]
+    }}>
+      <span style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" }}>{label}</span>
+      <span style={{ fontSize: "11px" }}>Google AdSense · High RPM Zone</span>
+    </div>
+  );
+}
+
+function ToolCard({ tool, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={() => onClick(tool)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: hovered
+          ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)`
+          : "rgba(255,255,255,0.03)",
+        border: hovered ? `1px solid ${tool.color}55` : "1px solid rgba(255,255,255,0.07)",
+        borderRadius: "16px",
+        padding: "20px",
+        cursor: "pointer",
+        transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: hovered ? `0 12px 40px ${tool.color}22` : "none",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {tool.badge && (
+        <span style={{
+          position: "absolute", top: "12px", right: "12px",
+          background: tool.badge === "VIRAL" ? "#FF6B35" : tool.badge === "HOT" ? "#FF4444" : "#4CAF50",
+          color: "#fff", fontSize: "9px", fontWeight: "700",
+          padding: "2px 7px", borderRadius: "20px", letterSpacing: "1px",
+          fontFamily: "'Outfit', sans-serif"
+        }}>{tool.badge}</span>
+      )}
+      <div style={{
+        width: "44px", height: "44px", borderRadius: "12px",
+        background: `${tool.color}22`, border: `1px solid ${tool.color}44`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: "20px", marginBottom: "12px"
+      }}>{tool.icon}</div>
+      <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "14px", color: "#fff", marginBottom: "6px" }}>{tool.name}</div>
+      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.45)", lineHeight: "1.4", marginBottom: "12px" }}>{tool.desc}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: tool.color, boxShadow: `0 0 6px ${tool.color}` }} />
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>{tool.uses} uses</span>
+      </div>
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, height: "2px",
+        background: `linear-gradient(90deg, transparent, ${tool.color}, transparent)`,
+        opacity: hovered ? 1 : 0, transition: "opacity 0.3s"
+      }} />
+    </div>
+  );
+}
+
+// ── FREE API ENGINE ────────────────────────────────────────────────────────────
+// Text  → Pollinations.ai  (100% free, no key, no limits)
+// Image → Pollinations.ai  (100% free, no key, instant)
+// Voice → Web Speech API   (browser built-in, zero cost)
+// ──────────────────────────────────────────────────────────────────────────────
+
+const IMAGE_CATS = ["Image"];
+const VOICE_CATS = ["Audio"];
+
+async function freeTextGenerate(toolName, userInput) {
+  const systemPrompt = `You are an expert AI tool called "${toolName}". 
+Produce a high-quality, detailed, ready-to-use output for the user's request.
+Be creative, professional, and thorough. Format your response clearly with sections where helpful.
+Always deliver maximum value — your output should be copy-paste ready.`;
+
+  const res = await fetch("https://text.pollinations.ai/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "openai",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: userInput }
+      ],
+      seed: Math.floor(Math.random() * 9999),
+      private: true,
+    }),
+  });
+  if (!res.ok) throw new Error("API error " + res.status);
+  return await res.text();
+}
+
+function freeImageUrl(prompt, width = 768, height = 512) {
+  const encoded = encodeURIComponent(prompt + ", high quality, detailed, professional, 4k");
+  return `https://image.pollinations.ai/prompt/${encoded}?width=${width}&height=${height}&nologo=true&enhance=true&seed=${Math.floor(Math.random()*99999)}`;
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.95;
+  utter.pitch = 1.05;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.name.includes("Google") || v.name.includes("Premium") || v.lang === "en-US");
+  if (preferred) utter.voice = preferred;
+  window.speechSynthesis.speak(utter);
+}
+
+// API badge shown inside modal
+function FreeBadge() {
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: "6px",
+      background: "rgba(76,175,80,0.12)", border: "1px solid rgba(76,175,80,0.25)",
+      borderRadius: "100px", padding: "4px 12px", marginBottom: "14px"
+    }}>
+      <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4CAF50", boxShadow: "0 0 8px #4CAF50", display: "inline-block" }} />
+      <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "11px", color: "#4CAF50", fontWeight: "600", letterSpacing: "0.5px" }}>
+        100% FREE · No API Key · No Signup · Powered by Pollinations AI
+      </span>
+    </div>
+  );
+}
+
+function ToolModal({ tool, onClose }) {
+  const isImage = IMAGE_CATS.includes(tool.cat);
+  const isVoice = VOICE_CATS.includes(tool.cat);
+
+  const [input,      setInput]      = useState("");
+  const [output,     setOutput]     = useState("");
+  const [imgUrl,     setImgUrl]     = useState("");
+  const [imgLoading, setImgLoading] = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [copied,     setCopied]     = useState(false);
+  const [speaking,   setSpeaking]   = useState(false);
+  const [apiTag,     setApiTag]     = useState("");
+
+  const placeholders = {
+    Image:   `Describe the image you want to generate…\ne.g. "A futuristic city at sunset with neon lights"`,
+    Audio:   `Enter the text you want spoken aloud…\ne.g. "Welcome to AIToolsHub Pro. Your AI journey starts here."`,
+    Writing: `Describe what you need…\ne.g. "Write a horror short story about an abandoned lighthouse"`,
+    Social:  `What's your topic or product?\ne.g. "New coffee brand targeting Gen Z in Pakistan"`,
+    SEO:     `Enter your niche or website topic…\ne.g. "AI tools blog for freelancers"`,
+    Career:  `Describe yourself or your goal…\ne.g. "Frontend developer, 3 years experience, applying at Google"`,
+    Code:    `Describe the code you need…\ne.g. "Python script to scrape product prices from Amazon"`,
+    Fun:     `Give a target or topic…\ne.g. "Roast my friend who always arrives late"`,
+  };
+
+  const runTool = async () => {
+    if (!input.trim()) return;
+    setLoading(true);
+    setOutput("");
+    setImgUrl("");
+    setCopied(false);
+
+    try {
+      if (isImage) {
+        // ── IMAGE PATH ─────────────────────────────────────────────
+        setApiTag("Pollinations Image AI · Free");
+        setImgLoading(true);
+        const url = freeImageUrl(input);
+        setImgUrl(url);
+        setLoading(false);
+
+      } else if (isVoice) {
+        // ── VOICE / TTS PATH ───────────────────────────────────────
+        setApiTag("Web Speech API · Browser Native · Free");
+        // Generate script first, then speak it
+        const script = await freeTextGenerate(tool.name, input);
+        setOutput(script);
+        setSpeaking(true);
+        speakText(script);
+        if (window.speechSynthesis) {
+          const check = setInterval(() => {
+            if (!window.speechSynthesis.speaking) { setSpeaking(false); clearInterval(check); }
+          }, 500);
+        }
+        setLoading(false);
+
+      } else {
+        // ── TEXT PATH ──────────────────────────────────────────────
+        setApiTag("Pollinations Text AI · Free");
+        const text = await freeTextGenerate(tool.name, input);
+        setOutput(text);
+        setLoading(false);
+      }
+    } catch (err) {
+      setOutput("⚠️ Connection error. Please try again in a moment.");
+      setLoading(false);
+      setImgLoading(false);
+    }
+  };
+
+  const copyOutput = () => {
+    navigator.clipboard?.writeText(output);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const stopSpeech = () => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  };
+
+  const downloadImg = () => {
+    const a = document.createElement("a");
+    a.href = imgUrl;
+    a.download = `${tool.name.replace(/\s+/g, "_")}.jpg`;
+    a.target = "_blank";
+    a.click();
+  };
+
+  const regenerate = () => {
+    setImgUrl("");
+    setOutput("");
+    runTool();
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", backdropFilter: "blur(18px)",
+      zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "20px", overflowY: "auto"
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "linear-gradient(145deg, #0B0D1C 0%, #0F1423 100%)",
+        border: `1px solid ${tool.color}40`,
+        borderRadius: "26px", padding: "32px", width: "100%", maxWidth: "720px",
+        boxShadow: `0 0 100px ${tool.color}18, 0 40px 80px rgba(0,0,0,0.9)`,
+        animation: "slideDown 0.3s ease"
+      }}>
+
+        {/* HEADER */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <div style={{
+              width: "58px", height: "58px", borderRadius: "18px",
+              background: `linear-gradient(135deg, ${tool.color}30, ${tool.color}10)`,
+              border: `1.5px solid ${tool.color}60`,
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px",
+              boxShadow: `0 8px 24px ${tool.color}20`
+            }}>{tool.icon}</div>
+            <div>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "21px", color: "#fff" }}>{tool.name}</div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.4)", marginTop: "2px" }}>{tool.desc}</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+            color: "rgba(255,255,255,0.6)", width: "38px", height: "38px", borderRadius: "50%",
+            cursor: "pointer", fontSize: "16px", transition: "all 0.2s", flexShrink: 0
+          }}>✕</button>
+        </div>
+
+        {/* FREE BADGE */}
+        <FreeBadge />
+
+        {/* AD */}
+        <AdBlock type="banner" label="Advertisement — Google AdSense" />
+        <div style={{ height: "18px" }} />
+
+        {/* INPUT */}
+        <div style={{ position: "relative", marginBottom: "12px" }}>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && e.metaKey) runTool(); }}
+            placeholder={placeholders[tool.cat] || `Enter your prompt for ${tool.name}...`}
+            rows={isImage ? 3 : 4}
+            style={{
+              width: "100%", background: "rgba(255,255,255,0.04)",
+              border: `1.5px solid rgba(255,255,255,0.08)`,
+              borderRadius: "14px", padding: "16px 16px 40px", color: "#fff", fontSize: "14px",
+              fontFamily: "'Outfit', sans-serif", resize: "vertical", outline: "none",
+              boxSizing: "border-box", lineHeight: "1.7", transition: "border-color 0.2s",
+            }}
+            onFocus={e => e.target.style.borderColor = tool.color + "80"}
+            onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+          />
+          <span style={{
+            position: "absolute", bottom: "12px", right: "14px",
+            fontFamily: "'Outfit', sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.2)"
+          }}>⌘↵ to run</span>
+        </div>
+
+        {/* RUN BUTTON */}
+        <button onClick={runTool} disabled={loading} style={{
+          width: "100%", padding: "15px", borderRadius: "14px",
+          background: loading
+            ? "rgba(255,255,255,0.04)"
+            : `linear-gradient(135deg, ${tool.color}ee, ${tool.color}88)`,
+          border: "none", color: "#fff", fontFamily: "'Syne', sans-serif",
+          fontWeight: "700", fontSize: "15px",
+          cursor: loading ? "not-allowed" : "pointer",
+          transition: "all 0.25s",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+          boxShadow: loading ? "none" : `0 8px 32px ${tool.color}30`,
+          letterSpacing: "0.3px"
+        }}>
+          {loading ? (
+            <>
+              <span style={{ display: "inline-block", animation: "spin 0.8s linear infinite", fontSize: "16px" }}>⚙️</span>
+              {isImage ? "Generating image…" : isVoice ? "Generating & speaking…" : "Generating…"}
+            </>
+          ) : (
+            <>
+              {isImage ? "🖼️" : isVoice ? "🎙️" : "✨"}
+              {isImage ? "Generate Image Free" : isVoice ? "Generate & Speak Free" : `Generate with ${tool.name}`}
+              <span style={{
+                background: "rgba(255,255,255,0.2)", borderRadius: "6px",
+                padding: "2px 8px", fontSize: "11px", fontWeight: "600"
+              }}>FREE</span>
+            </>
+          )}
+        </button>
+
+        {/* API TAG */}
+        {apiTag && (
+          <div style={{
+            marginTop: "10px", textAlign: "center",
+            fontFamily: "'Outfit', sans-serif", fontSize: "11px",
+            color: "rgba(255,255,255,0.22)", letterSpacing: "0.5px"
+          }}>Powered by: {apiTag}</div>
+        )}
+
+        {/* ── IMAGE OUTPUT ── */}
+        {isImage && imgUrl && (
+          <div style={{ marginTop: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "12px", color: "rgba(255,255,255,0.4)", letterSpacing: "2px" }}>GENERATED IMAGE</span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onClick={regenerate} style={{
+                  background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.7)", padding: "6px 14px", borderRadius: "8px",
+                  cursor: "pointer", fontFamily: "'Outfit', sans-serif", fontSize: "12px"
+                }}>🔄 Regenerate</button>
+                <button onClick={downloadImg} style={{
+                  background: `${tool.color}22`, border: `1px solid ${tool.color}44`,
+                  color: tool.color, padding: "6px 14px", borderRadius: "8px",
+                  cursor: "pointer", fontFamily: "'Outfit', sans-serif", fontSize: "12px", fontWeight: "600"
+                }}>⬇️ Download</button>
+              </div>
+            </div>
+            <div style={{
+              borderRadius: "14px", overflow: "hidden", border: `1px solid ${tool.color}30`,
+              background: "rgba(255,255,255,0.02)", minHeight: "200px", position: "relative"
+            }}>
+              <img
+                src={imgUrl}
+                alt="AI Generated"
+                onLoad={() => setImgLoading(false)}
+                style={{ width: "100%", display: "block", borderRadius: "14px" }}
+              />
+              {imgLoading && (
+                <div style={{
+                  position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: "12px",
+                  background: "rgba(0,0,0,0.6)", borderRadius: "14px"
+                }}>
+                  <span style={{ fontSize: "32px", animation: "spin 1.5s linear infinite", display: "inline-block" }}>🎨</span>
+                  <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)" }}>Rendering image…</span>
+                </div>
+              )}
+            </div>
+            <div style={{
+              marginTop: "10px", background: "rgba(76,175,80,0.08)", border: "1px solid rgba(76,175,80,0.15)",
+              borderRadius: "10px", padding: "10px 14px",
+              fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.4)"
+            }}>✅ Generated free via <strong style={{ color: "#4CAF50" }}>Pollinations.ai</strong> — No watermark · No credits · Unlimited</div>
+          </div>
+        )}
+
+        {/* ── TEXT OUTPUT ── */}
+        {!isImage && output && (
+          <div style={{
+            marginTop: "20px", background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "22px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "12px", color: "rgba(255,255,255,0.35)", letterSpacing: "2px" }}>AI OUTPUT</span>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {isVoice && (
+                  speaking ? (
+                    <button onClick={stopSpeech} style={{
+                      background: "rgba(233,30,99,0.15)", border: "1px solid rgba(233,30,99,0.3)",
+                      color: "#E91E63", padding: "6px 14px", borderRadius: "8px",
+                      cursor: "pointer", fontFamily: "'Outfit', sans-serif", fontSize: "12px", fontWeight: "600",
+                      animation: "pulse 1s infinite"
+                    }}>⏹ Stop Speaking</button>
+                  ) : (
+                    <button onClick={() => { setSpeaking(true); speakText(output); }} style={{
+                      background: "rgba(233,30,99,0.12)", border: "1px solid rgba(233,30,99,0.25)",
+                      color: "#E91E63", padding: "6px 14px", borderRadius: "8px",
+                      cursor: "pointer", fontFamily: "'Outfit', sans-serif", fontSize: "12px", fontWeight: "600"
+                    }}>🔊 Play Again</button>
+                  )
+                )}
+                <button onClick={regenerate} style={{
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.6)", padding: "6px 14px", borderRadius: "8px",
+                  cursor: "pointer", fontFamily: "'Outfit', sans-serif", fontSize: "12px"
+                }}>🔄 Retry</button>
+                <button onClick={copyOutput} style={{
+                  background: copied ? "rgba(76,175,80,0.15)" : "rgba(255,255,255,0.07)",
+                  border: copied ? "1px solid rgba(76,175,80,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                  color: copied ? "#4CAF50" : "rgba(255,255,255,0.7)", padding: "6px 14px",
+                  borderRadius: "8px", cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+                  fontSize: "12px", fontWeight: "600", transition: "all 0.2s"
+                }}>{copied ? "✅ Copied!" : "📋 Copy"}</button>
+              </div>
+            </div>
+            <div style={{
+              fontFamily: "'Outfit', sans-serif", fontSize: "14px", color: "rgba(255,255,255,0.82)",
+              lineHeight: "1.85", whiteSpace: "pre-wrap", maxHeight: "360px", overflowY: "auto",
+              paddingRight: "4px"
+            }}>{output}</div>
+            <div style={{
+              marginTop: "14px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.05)",
+              fontFamily: "'Outfit', sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.22)"
+            }}>
+              ✅ Generated free via <strong style={{ color: "#4CAF50" }}>Pollinations.ai</strong>
+              {isVoice && <> · 🔊 Spoken via <strong style={{ color: "#60A5FA" }}>Web Speech API</strong></>}
+              {" "}· {output.split(" ").length} words · {output.length} chars
+            </div>
+          </div>
+        )}
+
+        {/* BOTTOM AD */}
+        <div style={{ marginTop: "20px" }}>
+          <AdBlock type="banner" label="Advertisement" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AIToolsHubPro() {
+  const [darkMode] = useState(true);
+  const [search, setSearch] = useState("");
+  const [activecat, setActivecat] = useState("All");
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [newsletter, setNewsletter] = useState(false);
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [countersStarted, setCountersStarted] = useState(false);
+  const heroRef = useRef();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const tools = useCountUp(250, 1500, countersStarted);
+  const users = useCountUp(4800000, 2000, countersStarted);
+  const monthly = useCountUp(12000000, 2200, countersStarted);
+  const countries = useCountUp(180, 1800, countersStarted);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setNewsletter(true), 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setCountersStarted(true); }, { threshold: 0.3 });
+    if (heroRef.current) obs.observe(heroRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const filtered = AI_TOOLS.filter(t => {
+    const catMatch = activecat === "All" || t.cat === activecat;
+    const searchMatch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase()) || t.cat.toLowerCase().includes(search.toLowerCase());
+    return catMatch && searchMatch;
+  });
+
+  const formatNum = (n) => {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
+    if (n >= 1000) return (n / 1000).toFixed(0) + "K";
+    return n.toString();
+  };
+
+  return (
+    <div style={{
+      background: "#060810",
+      minHeight: "100vh",
+      color: "#fff",
+      fontFamily: "'Outfit', sans-serif",
+    }}>
+      <style>{`
+        ${FONTS}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #060810; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes gradient { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+        .nav-link:hover { color: #A78BFA !important; }
+        .cat-btn:hover { background: rgba(167,139,250,0.15) !important; border-color: #A78BFA !important; color: #A78BFA !important; }
+        .social-btn:hover { background: rgba(255,255,255,0.1) !important; }
+        .blog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important; }
+        .trend-row:hover { background: rgba(255,255,255,0.05) !important; }
+      `}</style>
+
+      {/* NAVBAR */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "rgba(6,8,16,0.92)", backdropFilter: "blur(24px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        padding: "0 24px"
+      }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            <div style={{
+              width: "36px", height: "36px", borderRadius: "10px",
+              background: "linear-gradient(135deg, #A78BFA, #60A5FA)",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px"
+            }}>⚡</div>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "18px" }}>
+              <span style={{ color: "#fff" }}>AITools</span>
+              <span style={{ background: "linear-gradient(90deg, #A78BFA, #60A5FA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Hub Pro</span>
+            </span>
+          </div>
+
+          {/* Search */}
+          <div style={{ flex: 1, maxWidth: "480px", position: "relative" }}>
+            <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", opacity: 0.4 }}>🔍</span>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search 250+ AI tools..."
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px", padding: "10px 14px 10px 40px", color: "#fff", fontSize: "14px",
+                outline: "none", fontFamily: "'Outfit', sans-serif", transition: "border-color 0.2s"
+              }}
+              onFocus={e => e.target.style.borderColor = "#A78BFA"}
+              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+            />
+          </div>
+
+          {/* Nav links */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {["Tools", "Blog", "Trending", "Submit Tool"].map(l => (
+              <a key={l} href="#" className="nav-link" style={{
+                color: "rgba(255,255,255,0.6)", fontSize: "13px", fontWeight: "500",
+                padding: "8px 12px", borderRadius: "8px", textDecoration: "none", transition: "color 0.2s",
+                display: window.innerWidth < 768 ? "none" : "block"
+              }}>{l}</a>
+            ))}
+            <button style={{
+              background: "linear-gradient(135deg, #A78BFA, #60A5FA)", border: "none",
+              color: "#fff", padding: "9px 18px", borderRadius: "10px", fontSize: "13px",
+              fontWeight: "700", cursor: "pointer", fontFamily: "'Syne', sans-serif",
+              flexShrink: 0
+            }}>Sign Up Free</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* TOP AD BANNER */}
+      <div style={{ maxWidth: "1400px", margin: "16px auto", padding: "0 24px" }}>
+        <AdBlock type="banner" label="Advertisement" />
+      </div>
+
+      {/* HERO SECTION */}
+      <section ref={heroRef} style={{ padding: "60px 24px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        {/* Background glow */}
+        <div style={{
+          position: "absolute", top: "-200px", left: "50%", transform: "translateX(-50%)",
+          width: "800px", height: "600px",
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.12) 0%, transparent 70%)",
+          pointerEvents: "none"
+        }} />
+        <div style={{
+          position: "absolute", top: "50px", left: "10%", width: "300px", height: "300px",
+          background: "radial-gradient(ellipse, rgba(96,165,250,0.06) 0%, transparent 70%)",
+          pointerEvents: "none"
+        }} />
+
+        <div style={{ maxWidth: "900px", margin: "0 auto", position: "relative" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)",
+            borderRadius: "100px", padding: "6px 16px", marginBottom: "24px"
+          }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4CAF50", boxShadow: "0 0 8px #4CAF50", animation: "pulse 2s infinite", display: "inline-block" }} />
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.7)", letterSpacing: "1px" }}>LIVE · 250+ FREE AI TOOLS · NO SIGNUP NEEDED</span>
+          </div>
+
+          <h1 style={{
+            fontFamily: "'Syne', sans-serif", fontWeight: "800",
+            fontSize: "clamp(36px, 6vw, 72px)", lineHeight: "1.1",
+            marginBottom: "20px", letterSpacing: "-1px"
+          }}>
+            The Ultimate<br />
+            <span style={{
+              background: "linear-gradient(135deg, #A78BFA 0%, #60A5FA 50%, #34D399 100%)",
+              backgroundSize: "200% 200%", animation: "gradient 4s ease infinite",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+            }}>AI Tools Hub</span><br />
+            for Everyone
+          </h1>
+
+          <p style={{
+            fontFamily: "'Outfit', sans-serif", fontSize: "clamp(15px, 2.5vw, 19px)",
+            color: "rgba(255,255,255,0.5)", lineHeight: "1.7",
+            maxWidth: "640px", margin: "0 auto 36px"
+          }}>
+            250+ free AI tools for writing, images, SEO, social media & more. No subscription, no signup. Start creating in seconds.
+          </p>
+
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginBottom: "48px" }}>
+            <button style={{
+              background: "linear-gradient(135deg, #A78BFA, #60A5FA)", border: "none",
+              color: "#fff", padding: "14px 32px", borderRadius: "14px", fontSize: "16px",
+              fontWeight: "700", cursor: "pointer", fontFamily: "'Syne', sans-serif",
+              boxShadow: "0 8px 32px rgba(167,139,250,0.3)"
+            }}>🚀 Explore All Tools</button>
+            <button style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff", padding: "14px 32px", borderRadius: "14px", fontSize: "16px",
+              fontWeight: "600", cursor: "pointer", fontFamily: "'Outfit', sans-serif"
+            }}>📊 View Trending</button>
+          </div>
+
+          {/* STATS COUNTERS */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "16px", maxWidth: "760px", margin: "0 auto"
+          }}>
+            {[
+              { label: "AI Tools", value: formatNum(tools), suffix: "+", icon: "⚡" },
+              { label: "Total Users", value: formatNum(users), suffix: "+", icon: "👥" },
+              { label: "Monthly Uses", value: formatNum(monthly), suffix: "+", icon: "📈" },
+              { label: "Countries", value: formatNum(countries), suffix: "+", icon: "🌍" },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: "16px", padding: "20px 12px", textAlign: "center"
+              }}>
+                <div style={{ fontSize: "24px", marginBottom: "6px" }}>{s.icon}</div>
+                <div style={{
+                  fontFamily: "'Syne', sans-serif", fontWeight: "800",
+                  fontSize: "clamp(20px, 3vw, 28px)",
+                  background: "linear-gradient(135deg, #A78BFA, #60A5FA)",
+                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+                }}>{s.value}{s.suffix}</div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.35)", marginTop: "4px", letterSpacing: "0.5px" }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* MAIN CONTENT */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 300px", gap: "32px" }}>
+        <div>
+          {/* CATEGORY FILTERS */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
+            {CATEGORIES.map(cat => (
+              <button key={cat} className="cat-btn" onClick={() => setActivecat(cat)} style={{
+                background: activecat === cat ? "rgba(167,139,250,0.15)" : "rgba(255,255,255,0.04)",
+                border: activecat === cat ? "1px solid #A78BFA" : "1px solid rgba(255,255,255,0.08)",
+                color: activecat === cat ? "#A78BFA" : "rgba(255,255,255,0.5)",
+                padding: "8px 16px", borderRadius: "100px", fontSize: "13px", fontWeight: "600",
+                cursor: "pointer", transition: "all 0.2s", fontFamily: "'Outfit', sans-serif"
+              }}>{cat}</button>
+            ))}
+            <span style={{ marginLeft: "auto", fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.3)", alignSelf: "center" }}>{filtered.length} tools</span>
+          </div>
+
+          {/* IN-FEED AD */}
+          <div style={{ marginBottom: "24px" }}>
+            <AdBlock type="banner" label="Sponsored · Google AdSense" />
+          </div>
+
+          {/* TOOLS GRID */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }}>
+            {filtered.map((tool, i) => (
+              <>
+                <ToolCard key={tool.id} tool={tool} onClick={setSelectedTool} />
+                {i === 11 && (
+                  <div key="ad-mid" style={{ gridColumn: "1/-1" }}>
+                    <AdBlock type="rectangle" label="Advertisement · Google AdSense" />
+                  </div>
+                )}
+                {i === 27 && (
+                  <div key="ad-mid2" style={{ gridColumn: "1/-1" }}>
+                    <AdBlock type="banner" label="Sponsored Content · AdSense" />
+                  </div>
+                )}
+              </>
+            ))}
+          </div>
+
+          {/* TRENDING TOOLS TABLE */}
+          <section style={{ marginTop: "48px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+              <div style={{
+                width: "32px", height: "32px", borderRadius: "8px",
+                background: "rgba(255,107,53,0.15)", border: "1px solid rgba(255,107,53,0.3)",
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>🔥</div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "22px" }}>Trending This Week</h2>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", overflow: "hidden" }}>
+              {TRENDING.map((t, i) => (
+                <div key={i} className="trend-row" style={{
+                  display: "flex", alignItems: "center", padding: "16px 20px", gap: "16px",
+                  borderBottom: i < TRENDING.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                  transition: "background 0.2s", cursor: "pointer"
+                }}>
+                  <span style={{
+                    fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "18px",
+                    color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(255,255,255,0.2)",
+                    width: "28px"
+                  }}>#{t.rank}</span>
+                  <span style={{ flex: 1, fontFamily: "'Outfit', sans-serif", fontWeight: "500", fontSize: "14px", color: "rgba(255,255,255,0.8)" }}>{t.name}</span>
+                  <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.35)" }}>{t.uses} uses</span>
+                  <span style={{
+                    background: "rgba(76,175,80,0.15)", color: "#4CAF50", border: "1px solid rgba(76,175,80,0.2)",
+                    padding: "3px 10px", borderRadius: "100px", fontSize: "11px", fontWeight: "700", fontFamily: "'Outfit', sans-serif"
+                  }}>{t.change}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* MID AD */}
+          <div style={{ margin: "32px 0" }}>
+            <AdBlock type="rectangle" label="Advertisement · High RPM Zone" />
+          </div>
+
+          {/* BLOG SECTION */}
+          <section>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "8px",
+                  background: "rgba(96,165,250,0.15)", border: "1px solid rgba(96,165,250,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center"
+                }}>📰</div>
+                <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "22px" }}>Trending AI News</h2>
+              </div>
+              <a href="#" style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "#60A5FA", textDecoration: "none" }}>View All →</a>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+              {BLOG_POSTS.map((post, i) => (
+                <div key={i} className="blog-card" style={{
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "16px", padding: "20px", cursor: "pointer", transition: "all 0.3s"
+                }}>
+                  <div style={{ fontSize: "32px", marginBottom: "12px" }}>{post.img}</div>
+                  <span style={{
+                    background: "rgba(167,139,250,0.12)", color: "#A78BFA", border: "1px solid rgba(167,139,250,0.2)",
+                    padding: "3px 10px", borderRadius: "100px", fontSize: "10px", fontWeight: "700",
+                    letterSpacing: "1px", fontFamily: "'Outfit', sans-serif"
+                  }}>{post.tag.toUpperCase()}</span>
+                  <h3 style={{
+                    fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "15px",
+                    lineHeight: "1.5", margin: "10px 0 8px", color: "rgba(255,255,255,0.9)"
+                  }}>{post.title}</h3>
+                  <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "rgba(255,255,255,0.35)", fontFamily: "'Outfit', sans-serif" }}>
+                    <span>👁️ {post.reads}</span>
+                    <span>⏱️ {post.time} read</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SEO PROGRAMMATIC PAGES */}
+          <section style={{ marginTop: "48px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "20px", padding: "28px" }}>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "20px", marginBottom: "16px" }}>
+              🔗 Popular Collections
+            </h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {[
+                "Best AI tools for students", "Free AI tools for bloggers", "AI logo maker online free",
+                "AI image generator no signup", "Best AI tools in Pakistan", "AI tools for YouTubers",
+                "AI writing tools for freelancers", "AI tools for marketing", "Best free AI chatbots",
+                "AI resume builder free", "AI tools for teachers", "AI video generators 2025",
+                "AI tools for small business", "AI content writers comparison", "AI SEO tools free",
+                "AI tools for Instagram growth", "Best AI image generators", "AI tools no login required",
+              ].map((tag, i) => (
+                <a key={i} href="#" style={{
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.55)", padding: "7px 14px", borderRadius: "100px",
+                  fontSize: "12px", textDecoration: "none", fontFamily: "'Outfit', sans-serif",
+                  transition: "all 0.2s"
+                }}>{tag}</a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* SIDEBAR */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <AdBlock type="sidebar" label="Sidebar Ad · Google AdSense" />
+
+          {/* Submit Tool */}
+          <div style={{
+            background: "linear-gradient(135deg, rgba(167,139,250,0.1), rgba(96,165,250,0.08))",
+            border: "1px solid rgba(167,139,250,0.2)", borderRadius: "16px", padding: "20px"
+          }}>
+            <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "16px", marginBottom: "8px" }}>🚀 Submit Your AI Tool</div>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", lineHeight: "1.6", marginBottom: "14px" }}>Get listed in front of 12M+ monthly users. Sponsored listings available.</div>
+            <button style={{
+              width: "100%", background: "linear-gradient(135deg, #A78BFA, #60A5FA)", border: "none",
+              color: "#fff", padding: "11px", borderRadius: "10px", fontSize: "13px",
+              fontWeight: "700", cursor: "pointer", fontFamily: "'Syne', sans-serif"
+            }}>Submit Tool →</button>
+          </div>
+
+          {/* Newsletter */}
+          <div style={{
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "16px", padding: "20px"
+          }}>
+            <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "16px", marginBottom: "8px" }}>📬 AI Weekly Newsletter</div>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.45)", lineHeight: "1.6", marginBottom: "14px" }}>Get top AI tools & news every Monday. 240K+ subscribers.</div>
+            <input placeholder="Your email address" style={{
+              width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "10px", padding: "10px 14px", color: "#fff", fontSize: "13px",
+              outline: "none", fontFamily: "'Outfit', sans-serif", marginBottom: "10px",
+              boxSizing: "border-box"
+            }} />
+            <button style={{
+              width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff", padding: "10px", borderRadius: "10px", fontSize: "13px",
+              fontWeight: "600", cursor: "pointer", fontFamily: "'Outfit', sans-serif"
+            }}>Subscribe Free</button>
+          </div>
+
+          {/* Top Categories */}
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "20px" }}>
+            <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "15px", marginBottom: "14px" }}>📂 Top Categories</div>
+            {[
+              { name: "Writing Tools", count: 48, icon: "✍️", color: "#A78BFA" },
+              { name: "Image & Design", count: 36, icon: "🎨", color: "#60A5FA" },
+              { name: "Social Media", count: 32, icon: "📸", color: "#E91E63" },
+              { name: "SEO & Marketing", count: 28, icon: "📈", color: "#4CAF50" },
+              { name: "Code & Dev", count: 24, icon: "💻", color: "#FF9800" },
+              { name: "Fun & Viral", count: 20, icon: "🔥", color: "#FF6B35" },
+            ].map((c, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: "10px", padding: "10px 0",
+                borderBottom: i < 5 ? "1px solid rgba(255,255,255,0.04)" : "none"
+              }}>
+                <span style={{ fontSize: "16px" }}>{c.icon}</span>
+                <span style={{ flex: 1, fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{c.name}</span>
+                <span style={{
+                  background: `${c.color}18`, color: c.color, border: `1px solid ${c.color}30`,
+                  padding: "2px 9px", borderRadius: "100px", fontSize: "11px", fontWeight: "700", fontFamily: "'Outfit', sans-serif"
+                }}>{c.count}</span>
+              </div>
+            ))}
+          </div>
+
+          <AdBlock type="rectangle" label="Advertisement" />
+
+          {/* Social Share */}
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "20px" }}>
+            <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "15px", marginBottom: "14px" }}>🌐 Share AIToolsHub</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              {[
+                { name: "Twitter/X", icon: "🐦", color: "#1DA1F2" },
+                { name: "Facebook", icon: "📘", color: "#1877F2" },
+                { name: "WhatsApp", icon: "📱", color: "#25D366" },
+                { name: "LinkedIn", icon: "💼", color: "#0077B5" },
+              ].map((s, i) => (
+                <button key={i} className="social-btn" style={{
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: s.color, padding: "10px 8px", borderRadius: "10px", fontSize: "12px",
+                  fontWeight: "600", cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                  transition: "background 0.2s"
+                }}>
+                  <span>{s.icon}</span><span>{s.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FEATURES STRIP */}
+      <section style={{ maxWidth: "1400px", margin: "48px auto", padding: "0 24px" }}>
+        <div style={{
+          background: "linear-gradient(135deg, rgba(167,139,250,0.06) 0%, rgba(96,165,250,0.06) 100%)",
+          border: "1px solid rgba(167,139,250,0.12)", borderRadius: "24px", padding: "40px",
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "32px"
+        }}>
+          {[
+            { icon: "⚡", title: "Instant Results", desc: "No waitlists. No signup required. Start using AI tools immediately." },
+            { icon: "🆓", title: "100% Free", desc: "All 250+ tools completely free. No hidden fees or credits." },
+            { icon: "🔒", title: "Privacy First", desc: "Your data is never stored or sold. Complete privacy guaranteed." },
+            { icon: "📱", title: "Mobile Ready", desc: "Perfect experience on any device — phone, tablet or desktop." },
+            { icon: "🌍", title: "Multilingual", desc: "Tools work in 50+ languages for global users everywhere." },
+            { icon: "🚀", title: "Blazing Fast", desc: "Powered by Cloudflare CDN with <1s response times globally." },
+          ].map((f, i) => (
+            <div key={i} style={{ textAlign: "center" }}>
+              <div style={{
+                width: "52px", height: "52px", borderRadius: "14px",
+                background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.2)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "22px", margin: "0 auto 14px"
+              }}>{f.icon}</div>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "15px", marginBottom: "6px" }}>{f.title}</div>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: "1.6" }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* BOTTOM AD */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto 32px", padding: "0 24px" }}>
+        <AdBlock type="rectangle" label="Advertisement · Google AdSense" />
+      </div>
+
+      {/* FOOTER */}
+      <footer style={{
+        background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "48px 24px 24px"
+      }}>
+        <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "32px", marginBottom: "40px" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                <div style={{
+                  width: "36px", height: "36px", borderRadius: "10px",
+                  background: "linear-gradient(135deg, #A78BFA, #60A5FA)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px"
+                }}>⚡</div>
+                <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "18px" }}>AIToolsHub Pro</span>
+              </div>
+              <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: "1.8", maxWidth: "260px" }}>
+                The world's largest free AI tools directory. 250+ tools for writing, design, marketing, and more.
+              </p>
+              <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+                {["🐦", "📘", "📱", "💼", "▶️"].map((icon, i) => (
+                  <button key={i} style={{
+                    width: "36px", height: "36px", borderRadius: "8px",
+                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer", fontSize: "14px"
+                  }}>{icon}</button>
+                ))}
+              </div>
+            </div>
+            {[
+              { title: "Tools", links: ["AI Writing", "AI Images", "AI SEO", "AI Social", "AI Code", "AI Voice"] },
+              { title: "Company", links: ["About Us", "Blog", "Press Kit", "Careers", "Contact", "Advertise"] },
+              { title: "Resources", links: ["API Access", "Sitemap", "Changelog", "Affiliates", "Help Center", "Status"] },
+              { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Cookie Policy", "GDPR", "Disclaimer", "Refunds"] },
+            ].map((col, i) => (
+              <div key={i}>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "700", fontSize: "13px", marginBottom: "14px", color: "rgba(255,255,255,0.7)", letterSpacing: "1px" }}>{col.title}</div>
+                {col.links.map((link, j) => (
+                  <a key={j} href="#" style={{
+                    display: "block", fontFamily: "'Outfit', sans-serif", fontSize: "13px",
+                    color: "rgba(255,255,255,0.35)", textDecoration: "none", marginBottom: "8px",
+                    transition: "color 0.2s"
+                  }}>{link}</a>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px",
+            display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px"
+          }}>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.25)" }}>
+              © 2025 AIToolsHub Pro · Built by Muhammad Hasnain · All Rights Reserved
+            </span>
+            <div style={{ display: "flex", gap: "16px" }}>
+              {["Sitemap", "Privacy", "Terms", "Cookies"].map((l, i) => (
+                <a key={i} href="#" style={{
+                  fontFamily: "'Outfit', sans-serif", fontSize: "12px",
+                  color: "rgba(255,255,255,0.25)", textDecoration: "none"
+                }}>{l}</a>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4CAF50", animation: "pulse 2s infinite", display: "inline-block" }} />
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.25)" }}>All systems operational</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* TOOL MODAL */}
+      {selectedTool && <ToolModal tool={selectedTool} onClose={() => setSelectedTool(null)} />}
+
+      {/* NEWSLETTER POPUP */}
+      {newsletter && !subscribed && (
+        <div style={{
+          position: "fixed", bottom: "24px", right: "24px", zIndex: 8888,
+          background: "linear-gradient(135deg, #0D0F1A, #111827)",
+          border: "1px solid rgba(167,139,250,0.25)",
+          borderRadius: "20px", padding: "24px", width: "320px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(167,139,250,0.1)",
+          animation: "slideDown 0.4s ease"
+        }}>
+          <button onClick={() => setNewsletter(false)} style={{
+            position: "absolute", top: "12px", right: "12px",
+            background: "rgba(255,255,255,0.07)", border: "none", color: "rgba(255,255,255,0.5)",
+            width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "14px"
+          }}>✕</button>
+          <div style={{ fontSize: "28px", marginBottom: "10px" }}>📬</div>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "17px", marginBottom: "6px" }}>Join 240K+ AI Enthusiasts</div>
+          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.45)", lineHeight: "1.6", marginBottom: "16px" }}>Get the hottest AI tools & news every Monday. Free forever.</div>
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            style={{
+              width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "10px", padding: "11px 14px", color: "#fff", fontSize: "13px",
+              outline: "none", fontFamily: "'Outfit', sans-serif", boxSizing: "border-box", marginBottom: "10px"
+            }}
+          />
+          <button onClick={() => { setSubscribed(true); setNewsletter(false); }} style={{
+            width: "100%", background: "linear-gradient(135deg, #A78BFA, #60A5FA)", border: "none",
+            color: "#fff", padding: "12px", borderRadius: "10px", fontSize: "14px",
+            fontWeight: "700", cursor: "pointer", fontFamily: "'Syne', sans-serif"
+          }}>Subscribe Free 🚀</button>
+          <div style={{ textAlign: "center", marginTop: "8px", fontFamily: "'Outfit', sans-serif", fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>No spam · Unsubscribe anytime</div>
+        </div>
+      )}
+    </div>
+  );
+}
